@@ -40,6 +40,14 @@ ENV/
 # Excel backup (optional - remove if you want to track it)
 # backup_visitors.xlsx
 
+# SQLite database (no longer used)
+*.db
+*.sqlite
+*.sqlite3
+
+# Backup files
+backups/*.db
+
 # OS
 .DS_Store
 Thumbs.db
@@ -47,3 +55,7 @@ Thumbs.db
 # Temporary files
 *.tmp
 *.temp
+
+# Test files
+test_*.py
+*_test.py
