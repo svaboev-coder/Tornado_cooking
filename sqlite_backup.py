@@ -39,6 +39,10 @@ class SQLiteBackupManager:
             shutil.copy2(self.db_path, backup_path)
             
             logger.info(f"Создана резервная копия: {backup_path}")
+            
+            # Очищаем старые резервные копии, оставляя только 3 последние
+            self.cleanup_old_backups(keep_count=3)
+            
             return backup_path
             
         except Exception as e:
@@ -112,7 +116,7 @@ class SQLiteBackupManager:
             logger.error(f"Ошибка удаления резервной копии: {e}")
             return False
     
-    def cleanup_old_backups(self, keep_count: int = 10) -> int:
+    def cleanup_old_backups(self, keep_count: int = 3) -> int:
         """Очистка старых резервных копий, оставляя только последние N"""
         try:
             backups = self.get_backup_list()

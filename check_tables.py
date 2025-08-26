@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-import sqlite3
+import psycopg2
 import os
 from database import db_manager
 from sqlite_backup import sqlite_backup_manager
 
 def check_database():
     """Проверка и инициализация базы данных"""
-    print("🔍 Проверка базы данных SQLite3...")
+    print("🔍 Проверка базы данных PostgreSQL...")
     
     try:
         # Проверяем подключение к базе данных
@@ -65,10 +65,10 @@ def initialize_database():
         
         for room in test_rooms:
             try:
-                db_manager.insert_record("справочник_номеров", {"номер": room})
+                db_manager.insert_record("справочник номеров", {"номер": room})
                 print(f"  ✅ Добавлен номер: {room}")
             except Exception as e:
-                if "UNIQUE constraint failed" in str(e):
+                if "duplicate key" in str(e).lower() or "unique" in str(e).lower():
                     print(f"  ⚠️ Номер уже существует: {room}")
                 else:
                     print(f"  ❌ Ошибка добавления номера {room}: {e}")
@@ -94,7 +94,7 @@ def initialize_database():
                 db_manager.insert_record("посетители", visitor)
                 print(f"  ✅ Добавлен посетитель: {visitor['ФИО']} - {visitor['номер']} - {visitor['дата']}")
             except Exception as e:
-                if "UNIQUE constraint failed" in str(e):
+                if "duplicate key" in str(e).lower() or "unique" in str(e).lower():
                     print(f"  ⚠️ Запись уже существует: {visitor['ФИО']} - {visitor['номер']} - {visitor['дата']}")
                 else:
                     print(f"  ❌ Ошибка добавления посетителя: {e}")
@@ -125,7 +125,7 @@ def create_backup():
 def main():
     """Главная функция"""
     print("=" * 50)
-    print("🔧 Проверка и инициализация базы данных SQLite3")
+    print("🔧 Проверка и инициализация базы данных PostgreSQL")
     print("=" * 50)
     
     # Проверяем базу данных

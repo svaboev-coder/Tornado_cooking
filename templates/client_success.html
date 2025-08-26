@@ -1,0 +1,48 @@
+{% extends "client_base.html" %}
+
+{% block title %}Регистрация завершена - Регистрация на питание{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="text-center">
+            <div class="mb-4">
+                <i class="fas fa-check-circle fa-5x text-success"></i>
+            </div>
+            
+            <h2 class="fw-bold text-success mb-3">
+                Регистрация успешно завершена!
+            </h2>
+            
+            <p class="lead text-muted mb-4">
+                Вы успешно зарегистрировались на питание в столовой.
+            </p>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Что дальше?
+                    </h5>
+                    <ul class="list-unstyled mb-0">
+                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Ваши данные сохранены в системе</li>
+                        <li><i class="fas fa-arrow-right text-primary me-2"></i>Можете получить пропуск в столовую</li>
+                        <li><i class="fas fa-arrow-right text-primary me-2"></i>При необходимости обратитесь к администратору</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                <a href="{{ url_for('register') }}" class="btn btn-primary me-md-2">
+                    <i class="fas fa-plus me-2"></i>
+                    Новая регистрация
+                </a>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                    <i class="fas fa-home me-2"></i>
+                    На главную
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

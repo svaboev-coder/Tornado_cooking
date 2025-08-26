@@ -1,0 +1,71 @@
+version: '3.8'
+
+services:
+  # Основное приложение
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:5000"
+    volumes:
+      - ./backups:/app/backups
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - tornado-network
+
+  # Административное приложение
+  admin:
+    build:
+      context: .
+      dockerfile: Dockerfile.admin
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./backups:/app/backups
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - tornado-network
+
+  # Клиентское приложение
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile.client
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./backups:/app/backups
+    environment:
+      - FLASK_ENV=production
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_USER=${DB_USER}
+      - DB_PASSWORD=${DB_PASSWORD}
+      - DB_NAME=${DB_NAME}
+    restart: unless-stopped
+    networks:
+      - tornado-network
+
+networks:
+  tornado-network:
+    driver: bridge
+
+volumes:
+  db-data:
+
+

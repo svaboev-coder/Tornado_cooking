@@ -1,0 +1,30 @@
+# Используем официальный образ Python
+FROM python:3.11-slim
+
+# Устанавливаем рабочую директорию
+WORKDIR /app
+
+# Копируем файлы зависимостей
+COPY requirements.txt .
+
+# Устанавливаем Python зависимости
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Копируем код приложения
+COPY . .
+
+# Создаем директорию для резервных копий
+RUN mkdir -p backups
+
+# Открываем порт
+EXPOSE 5000
+
+# Переменные окружения
+ENV FLASK_APP=app.py
+ENV FLASK_ENV=production
+ENV PYTHONPATH=/app
+
+# Команда запуска
+CMD ["python", "app.py"]
+
+

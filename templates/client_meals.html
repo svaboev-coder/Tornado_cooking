@@ -1,0 +1,353 @@
+{% extends "client_base.html" %}
+
+{% block title %}Заполнение питания - Регистрация на питание{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-utensils me-3"></i>
+                Заполнение питания
+            </h2>
+            <p class="text-muted">Укажите количество человек на питание по дням</p>
+        </div>
+    </div>
+</div>
+
+<!-- Информация о регистрации -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-info text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Данные регистрации
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-3">
+                        <strong>Корпус:</strong> {{ registration_data.building }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Номер:</strong> {{ registration_data.room.split('/')[1] if '/' in registration_data.room else registration_data.room }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Представитель:</strong> {{ registration_data.representative_name }}
+                    </div>
+                    <div class="col-md-3">
+                        <strong>Период:</strong> {{ registration_data.check_in_date }} - {{ registration_data.check_out_date }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Форма заполнения питания -->
+<form method="POST" id="mealsForm">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clipboard-list me-2"></i>
+                        Питание по дням
+                    </h5>
+                    <button type="button" class="btn btn-light btn-sm" id="fillFirstRow">
+                        <i class="fas fa-copy me-2"></i>
+                        Заполнить
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered meal-table">
+                            <thead>
+                                <tr>
+                                    <th>Дата</th>
+                                    <th>ФИО</th>
+                                    <th colspan="2">Завтрак</th>
+                                    <th colspan="2">Обед</th>
+                                    <th colspan="2">Ужин</th>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th></th>
+                                    <th>Взрослые</th>
+                                    <th>Дети</th>
+                                    <th>Взрослые</th>
+                                    <th>Дети</th>
+                                    <th>Взрослые</th>
+                                    <th>Дети</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for date in dates %}
+                                <tr data-date="{{ date.strftime('%Y-%m-%d') }}">
+                                    <td class="align-middle">
+                                        <strong>{{ date.strftime('%d.%m.%Y') }}</strong>
+                                    </td>
+                                    <td class="align-middle">
+                                        <strong>{{ registration_data.representative_name }}</strong>
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="breakfast_adults_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="breakfast"
+                                               data-type="adults">
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="breakfast_children_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="breakfast"
+                                               data-type="children">
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="lunch_adults_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="lunch"
+                                               data-type="adults">
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="lunch_children_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="lunch"
+                                               data-type="children">
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="dinner_adults_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="dinner"
+                                               data-type="adults">
+                                    </td>
+                                    <td>
+                                        <input type="number" 
+                                               class="form-control meal-input" 
+                                               name="dinner_children_{{ date.strftime('%Y-%m-%d') }}"
+                                               value="0" 
+                                               min="0" 
+                                               max="20"
+                                               data-meal="dinner"
+                                               data-type="children">
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Кнопки управления -->
+    <div class="row mt-4">
+        <div class="col-12 text-center">
+            <button type="button" class="btn btn-secondary me-3" onclick="history.back()">
+                <i class="fas fa-arrow-left me-2"></i>
+                Назад
+            </button>
+            <button type="submit" class="btn btn-success">
+                <i class="fas fa-save me-2"></i>
+                Сохранить регистрацию
+            </button>
+        </div>
+    </div>
+</form>
+
+<!-- Инструкция -->
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb me-2"></i>
+                    Инструкция по заполнению
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-info-circle text-info me-2"></i>Как заполнять:</h6>
+                        <ul class="mb-0">
+                            <li>Заполните первую строку с желаемым количеством человек</li>
+                            <li>Нажмите "Заполнить" для копирования первой строки во все остальные дни</li>
+                            <li>При необходимости внесите изменения в отдельные дни</li>
+                            <li>Можете заполнять каждую строку индивидуально</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-exclamation-triangle text-warning me-2"></i>Важно:</h6>
+                        <ul class="mb-0">
+                            <li>Укажите количество взрослых и детей отдельно</li>
+                            <li>Максимальное значение для каждого поля: 20</li>
+                            <li>Можно указать 0, если питание не требуется</li>
+                            <li>После сохранения изменения внести нельзя</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    console.log('jQuery загружен, версия:', $.fn.jquery);
+    console.log('Кнопка "Заполнить" найдена:', $('#fillFirstRow').length > 0);
+    // Заполнение первой строки во все остальные
+    $('#fillFirstRow').click(function() {
+        console.log('Кнопка "Заполнить" нажата');
+        
+        var firstRow = $('tbody tr:first');
+        console.log('Первая строка найдена:', firstRow.length > 0);
+        
+        // Собираем значения из первой строки по позиции
+        var firstRowValues = [];
+        firstRow.find('input').each(function(index) {
+            var value = $(this).val();
+            firstRowValues[index] = value;
+            console.log('Позиция', index, '=', value);
+        });
+        
+        console.log('Всего полей в первой строке:', firstRowValues.length);
+        
+        // Заполняем остальные строки по позиции
+        var otherRows = $('tbody tr:not(:first)');
+        console.log('Найдено строк для заполнения:', otherRows.length);
+        
+        otherRows.each(function(rowIndex) {
+            var row = $(this);
+            var filledCount = 0;
+            row.find('input').each(function(inputIndex) {
+                if (firstRowValues[inputIndex] !== undefined) {
+                    $(this).val(firstRowValues[inputIndex]);
+                    filledCount++;
+                }
+            });
+            console.log('Строка', rowIndex + 1, 'заполнена полей:', filledCount);
+        });
+        
+        // Показываем уведомление
+        showNotification('Первая строка скопирована во все остальные дни', 'success');
+        console.log('Операция завершена');
+    });
+    
+    // Валидация формы
+    $('#mealsForm').submit(function(e) {
+        var hasData = false;
+        
+        $('.meal-input').each(function() {
+            if (parseInt($(this).val()) > 0) {
+                hasData = true;
+                return false; // break
+            }
+        });
+        
+        if (!hasData) {
+            e.preventDefault();
+            showNotification('Необходимо указать хотя бы одно питание', 'error');
+            return false;
+        }
+        
+        // Показываем индикатор загрузки
+        $(this).find('button[type="submit"]').prop('disabled', true)
+            .html('<i class="fas fa-spinner fa-spin me-2"></i>Сохранение...');
+    });
+    
+    // Валидация ввода
+    $('.meal-input').on('input', function() {
+        var value = parseInt($(this).val());
+        if (value < 0) {
+            $(this).val(0);
+        } else if (value > 20) {
+            $(this).val(20);
+        }
+    });
+    
+    // Функция показа уведомлений
+    function showNotification(message, type) {
+        var alertClass = type === 'error' ? 'alert-danger' : 'alert-success';
+        var icon = type === 'error' ? 'exclamation-triangle' : 'check-circle';
+        
+        var alert = $('<div class="alert ' + alertClass + ' alert-dismissible fade show" role="alert">' +
+            '<i class="fas fa-' + icon + ' me-2"></i>' + message +
+            '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+            '</div>');
+        
+        $('.main-container').prepend(alert);
+        
+        // Автоматически скрыть через 5 секунд
+        setTimeout(function() {
+            alert.alert('close');
+        }, 5000);
+    }
+    
+    // Подсветка строк при наведении
+    $('tbody tr').hover(
+        function() {
+            $(this).addClass('table-hover');
+        },
+        function() {
+            $(this).removeClass('table-hover');
+        }
+    );
+});
+</script>
+
+<style>
+.meal-table tbody tr:hover {
+    background-color: rgba(52, 152, 219, 0.1) !important;
+}
+
+.meal-input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 0.2rem rgba(52, 152, 219, 0.25);
+}
+
+.table-hover {
+    background-color: rgba(52, 152, 219, 0.05) !important;
+}
+
+/* Настройка ширины колонок */
+.meal-table th:nth-child(1), .meal-table td:nth-child(1) {
+    width: 15%; /* Дата */
+}
+
+.meal-table th:nth-child(2), .meal-table td:nth-child(2) {
+    width: 25%; /* ФИО - увеличенная ширина */
+}
+
+.meal-table th:nth-child(3), .meal-table td:nth-child(3),
+.meal-table th:nth-child(4), .meal-table td:nth-child(4),
+.meal-table th:nth-child(5), .meal-table td:nth-child(5),
+.meal-table th:nth-child(6), .meal-table td:nth-child(6),
+.meal-table th:nth-child(7), .meal-table td:nth-child(7),
+.meal-table th:nth-child(8), .meal-table td:nth-child(8) {
+    width: 7.5%; /* Колонки питания - уменьшенная ширина */
+}
+</style>
+{% endblock %}

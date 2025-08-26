@@ -1,6 +1,5 @@
 import datetime
 from typing import Dict, List, Any, Optional
-from telebot import types
 from database import db_manager
 from sqlite_backup import sqlite_backup_manager
 import logging
@@ -38,7 +37,7 @@ class RegistrationManager:
                 db_manager.connect()
             
             # Получаем номера из справочника
-            rooms_data = db_manager.get_table_data("справочник_номеров", 100)
+            rooms_data = db_manager.get_table_data("справочник номеров", 100)
             return [room['номер'] for room in rooms_data]
         except Exception as e:
             logger.error(f"Ошибка получения номеров: {e}")
@@ -76,7 +75,7 @@ class RegistrationManager:
             logger.error(f"Ошибка получения номеров в корпусе {building}: {e}")
             return []
     
-    def step_start(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_start(self, message, user_state) -> tuple[str, str, Any]:
         """Начальный шаг регистрации"""
         user_state.current_step = 'select_building'
         user_state.registration_data.clear()
@@ -85,20 +84,18 @@ class RegistrationManager:
         if not buildings:
             return 'error', '❌ Не удалось получить список корпусов. Попробуйте позже.', None
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-        for building in buildings:
-            markup.add(types.KeyboardButton(building))
-        markup.add(types.KeyboardButton("❌ Отмена"))
-        
+        # Для веб-приложения возвращаем только текст
         text = (
             "🏨 <b>Регистрация на питание</b>\n\n"
             "Шаг 1 из 6: Выбор корпуса\n\n"
-            "Выберите корпус:"
+            "Доступные корпуса:\n"
         )
+        for building in buildings:
+            text += f"• {building}\n"
         
-        return 'select_building', text, markup
+        return 'select_building', text, None
     
-    def step_select_building(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_select_building(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг выбора корпуса"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -117,21 +114,16 @@ class RegistrationManager:
         if not rooms:
             return 'error', f"❌ Не удалось получить номера в корпусе {building}. Попробуйте позже.", None
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-        for room in rooms:
-            markup.add(types.KeyboardButton(room))
-        markup.add(types.KeyboardButton("🔙 Назад к корпусам"))
-        markup.add(types.KeyboardButton("❌ Отмена"))
-        
+        # Для веб-приложения возвращаем только текст
         text = (
             f"✅ Выбран корпус: <b>{building}</b>\n\n"
             "Шаг 1 из 6: Выбор номера\n\n"
             f"Выберите номер в корпусе {building}:"
         )
         
-        return 'select_room', text, markup
+        return 'select_room', text, None
     
-    def step_select_room(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_select_room(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг выбора номера"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -152,18 +144,16 @@ class RegistrationManager:
         user_state.registration_data.pop('date_conflict', None)
         user_state.current_step = 'enter_name'
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(types.KeyboardButton("❌ Отмена"))
-        
+        # Для веб-приложения возвращаем только текст
         text = (
             f"✅ Выбран номер: <b>{room}</b>\n\n"
             "Шаг 2 из 6: Ввод имени\n\n"
             "Введите ваше полное имя (ФИО):"
         )
         
-        return 'enter_name', text, markup
+        return 'enter_name', text, None
     
-    def step_enter_name(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_enter_name(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг ввода имени"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -175,9 +165,7 @@ class RegistrationManager:
         user_state.registration_data['name'] = name
         user_state.current_step = 'enter_dates'
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(types.KeyboardButton("❌ Отмена"))
-        
+        # Для веб-приложения возвращаем только текст
         text = (
             f"✅ Имя: <b>{name}</b>\n\n"
             "Шаг 3 из 6: Даты размещения\n\n"
@@ -185,9 +173,9 @@ class RegistrationManager:
             "Например: 25.08.2024"
         )
         
-        return 'enter_dates', text, markup
+        return 'enter_dates', text, None
     
-    def step_enter_dates(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_enter_dates(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг ввода дат"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -205,21 +193,19 @@ class RegistrationManager:
             user_state.registration_data['start_date'] = start_date
             user_state.current_step = 'enter_end_date'
             
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(types.KeyboardButton("❌ Отмена"))
-            
+            # Для веб-приложения возвращаем только текст
             text = (
                 f"✅ Дата начала: <b>{start_date.strftime('%d.%m.%Y')}</b>\n\n"
                 "Теперь введите дату окончания размещения в формате ДД.ММ.ГГГГ\n"
                 "Например: 30.08.2024"
             )
             
-            return 'enter_end_date', text, markup
+            return 'enter_end_date', text, None
             
         except ValueError:
             return 'enter_dates', "❌ Неверный формат даты. Используйте формат ДД.ММ.ГГГГ:", None
     
-    def step_enter_end_date(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_enter_end_date(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг ввода даты окончания"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -243,10 +229,7 @@ class RegistrationManager:
             
             user_state.registration_data['date_range'] = date_range
             
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(types.KeyboardButton("✅ Подтвердить"))
-            markup.add(types.KeyboardButton("❌ Отмена"))
-            
+            # Для веб-приложения возвращаем только текст
             text = (
                 f"✅ Дата окончания: <b>{end_date.strftime('%d.%m.%Y')}</b>\n\n"
                 f"📅 <b>Период размещения:</b>\n"
@@ -255,12 +238,12 @@ class RegistrationManager:
                 "Подтвердите даты или начните заново:"
             )
             
-            return 'confirm_dates', text, markup
+            return 'confirm_dates', text, None
             
         except ValueError:
             return 'enter_end_date', "❌ Неверный формат даты. Используйте формат ДД.ММ.ГГГГ:", None
     
-    def step_confirm_dates(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_confirm_dates(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг подтверждения дат"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -303,12 +286,15 @@ class RegistrationManager:
                 user_state.registration_data['date_conflict'] = True
                 user_state.current_step = 'enter_dates'
                 
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                markup.add(types.KeyboardButton("📅 Изменить даты"))
-                markup.add(types.KeyboardButton("🏨 Изменить номер"))
-                markup.add(types.KeyboardButton("❌ Отмена"))
+                # Для веб-приложения возвращаем только текст
+                text = (
+                    "📅 <b>Ввод дат размещения</b>\n\n"
+                    "Введите дату начала размещения в формате ДД.ММ.ГГГГ\n"
+                    "Например: 25.08.2024\n\n"
+                    "⚠️ <b>Убедитесь, что выбранные даты не пересекаются с существующими записями.</b>"
+                )
                 
-                return 'date_conflict', conflict_text, markup
+                return 'enter_dates', text, None
         
         # Нет конфликтов - продолжаем регистрацию
         # Инициализируем данные для каждого дня
@@ -316,19 +302,12 @@ class RegistrationManager:
         user_state.registration_data['current_day_index'] = 0
         user_state.current_step = 'enter_meals_for_day'
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(types.KeyboardButton("0 0 0 0 0 0"))
-        markup.add(types.KeyboardButton("❌ Отмена"))
-        
-        # Получаем первую дату
-        date_range = user_state.registration_data['date_range']
-        current_date = date_range[0]
-        
+        # Для веб-приложения возвращаем только текст
         text = (
             f"✅ <b>Даты подтверждены без конфликтов!</b>\n\n"
             f"Шаг 4 из 6: Информация о питании\n\n"
             f"📅 <b>День {user_state.registration_data['current_day_index'] + 1} из {len(date_range)}</b>\n"
-            f"Дата: <b>{current_date.strftime('%d.%m.%Y')}</b>\n\n"
+            f"Дата: <b>{date_range[0].strftime('%d.%m.%Y')}</b>\n\n"
             "Введите количество людей на каждый прием пищи для этого дня.\n\n"
             "<b>Формат ввода:</b> 6 чисел через пробел\n"
             "<b>Порядок:</b> взрослые завтрак, дети завтрак, взрослые обед, дети обед, взрослые ужин, дети ужин\n\n"
@@ -337,9 +316,9 @@ class RegistrationManager:
             "Введите данные:"
         )
         
-        return 'enter_meals_for_day', text, markup
+        return 'enter_meals_for_day', text, None
 
-    def step_date_conflict(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_date_conflict(self, message, user_state) -> tuple[str, str, Any]:
         """Обработка конфликта дат"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -349,9 +328,7 @@ class RegistrationManager:
             user_state.current_step = 'enter_dates'
             user_state.registration_data.pop('date_conflict', None)  # Убираем флаг конфликта
             
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(types.KeyboardButton("❌ Отмена"))
-            
+            # Для веб-приложения возвращаем только текст
             text = (
                 "📅 <b>Ввод дат размещения</b>\n\n"
                 "Введите дату начала размещения в формате ДД.ММ.ГГГГ\n"
@@ -359,7 +336,7 @@ class RegistrationManager:
                 "⚠️ <b>Убедитесь, что выбранные даты не пересекаются с существующими записями.</b>"
             )
             
-            return 'enter_dates', text, markup
+            return 'enter_dates', text, None
         
         elif message.text == "🏨 Изменить номер":
             # Возвращаемся к выбору номера
@@ -375,19 +352,14 @@ class RegistrationManager:
                 # Получаем номера в выбранном корпусе
                 rooms = self.get_rooms_in_building(building)
                 if rooms:
-                    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, one_time_keyboard=True)
-                    for room in rooms:
-                        markup.add(types.KeyboardButton(room))
-                    markup.add(types.KeyboardButton("🔙 Назад к корпусам"))
-                    markup.add(types.KeyboardButton("❌ Отмена"))
-                    
+                    # Для веб-приложения возвращаем только текст
                     text = (
                         f"✅ Выбран корпус: <b>{building}</b>\n\n"
                         "Шаг 1 из 6: Выбор номера\n\n"
                         f"Выберите номер в корпусе {building}:"
                     )
                     
-                    return 'select_room', text, markup
+                    return 'select_room', text, None
             
             # Если что-то пошло не так, возвращаемся к началу
             return self.step_start(message, user_state)
@@ -395,7 +367,7 @@ class RegistrationManager:
         else:
             return 'date_conflict', "❌ Выберите '📅 Изменить даты', '🏨 Изменить номер' или '❌ Отмена':", None
     
-    def step_enter_meals_for_day(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_enter_meals_for_day(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг ввода информации о питании для конкретного дня"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -460,7 +432,7 @@ class RegistrationManager:
         # Переходим к следующему дню или подтверждению
         return self.step_next_day_or_confirm(message, user_state)
     
-    def step_next_day_or_confirm(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_next_day_or_confirm(self, message, user_state) -> tuple[str, str, Any]:
         """Переход к следующему дню или подтверждение регистрации"""
         current_day_index = user_state.registration_data['current_day_index']
         date_range = user_state.registration_data['date_range']
@@ -473,23 +445,8 @@ class RegistrationManager:
             
             next_date = date_range[current_day_index + 1]
             
-            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-            markup.add(types.KeyboardButton("0 0 0 0 0 0"))
-            markup.add(types.KeyboardButton("❌ Отмена"))
-            
-            # Показываем введенные данные для текущего дня
-            current_date = date_range[current_day_index]
-            date_key = current_date.strftime('%Y-%m-%d')
-            current_day_meals = user_state.registration_data['daily_meals'][date_key]
-            current_summary = (
-                f"✅ <b>Данные для {date_range[current_day_index].strftime('%d.%m.%Y')} сохранены:</b>\n"
-                f"• Завтрак: {current_day_meals.get('зв', 0)} взрослых, {current_day_meals.get('зд', 0)} детей\n"
-                f"• Обед: {current_day_meals.get('ов', 0)} взрослых, {current_day_meals.get('од', 0)} детей\n"
-                f"• Ужин: {current_day_meals.get('ув', 0)} взрослых, {current_day_meals.get('уд', 0)} детей\n\n"
-            )
-            
+            # Для веб-приложения возвращаем только текст
             text = (
-                f"{current_summary}"
                 f"📅 <b>День {current_day_index + 2} из {len(date_range)}</b>\n"
                 f"Дата: <b>{next_date.strftime('%d.%m.%Y')}</b>\n\n"
                 "Введите количество людей на каждый прием пищи для этого дня.\n\n"
@@ -499,12 +456,12 @@ class RegistrationManager:
                 "Введите данные:"
             )
             
-            return 'enter_meals_for_day', text, markup
+            return 'enter_meals_for_day', text, None
         else:
             # Все дни обработаны, переходим к подтверждению
             return self.step_confirm_registration(message, user_state)
     
-    def step_confirm_registration(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_confirm_registration(self, message, user_state) -> tuple[str, str, Any]:
         """Шаг подтверждения регистрации"""
         if message.text == "❌ Отмена":
             return 'cancel', "❌ Регистрация отменена.", None
@@ -514,7 +471,8 @@ class RegistrationManager:
         daily_meals = data['daily_meals']
         date_range = data['date_range']
         
-        summary = (
+        # Для веб-приложения возвращаем только текст
+        text = (
             "📋 <b>Сводка регистрации:</b>\n\n"
             f"🏨 Номер: <b>{data['room']}</b>\n"
             f"👤 Имя: <b>{data['name']}</b>\n"
@@ -528,24 +486,28 @@ class RegistrationManager:
             date_key = date.strftime('%Y-%m-%d')
             day_meals = daily_meals.get(date_key, {})
             
-            summary += (
+            text += (
                 f"\n📅 <b>День {i} ({date.strftime('%d.%m.%Y')}):</b>\n"
                 f"• Завтрак: {day_meals.get('зв', 0)} взрослых, {day_meals.get('зд', 0)} детей\n"
                 f"• Обед: {day_meals.get('ов', 0)} взрослых, {day_meals.get('од', 0)} детей\n"
                 f"• Ужин: {day_meals.get('ув', 0)} взрослых, {day_meals.get('уд', 0)} детей\n"
             )
         
-        summary += "\nПодтвердите регистрацию:"
+        text += "\nПодтвердите регистрацию:"
         
         user_state.current_step = 'complete'
         
-        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        markup.add(types.KeyboardButton("✅ Подтвердить регистрацию"))
-        markup.add(types.KeyboardButton("❌ Отмена"))
+        # Для веб-приложения возвращаем только текст
+        text = (
+            "✅ <b>Регистрация успешно завершена!</b>\n\n"
+            "Ваши данные сохранены в базе данных.\n"
+            "Вы можете просмотреть их в разделе '📊 Таблицы БД'.\n\n"
+            "Выберите дальнейшее действие:"
+        )
         
-        return 'complete', summary, markup
+        return 'complete', text, None
     
-    def step_complete(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def step_complete(self, message, user_state) -> tuple[str, str, Any]:
         """Завершающий шаг - сохранение данных"""
         logger.info(f"step_complete вызван с текстом: '{message.text}'")
         
@@ -564,19 +526,14 @@ class RegistrationManager:
             logger.info(f"Результат сохранения: {success}")
             
             if success:
-                markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-                markup.add(types.KeyboardButton("📝 Регистрация"))
-                markup.add(types.KeyboardButton("📊 Таблицы БД"))
-                markup.add(types.KeyboardButton("❓ Справка"))
-                
+                # Для веб-приложения возвращаем только текст
                 text = (
-                    "🎉 <b>Регистрация успешно завершена!</b>\n\n"
-                    "Ваши данные сохранены в базе данных.\n"
-                    "Вы можете просмотреть их в разделе '📊 Таблицы БД'.\n\n"
-                    "Выберите дальнейшее действие:"
+                    "📝 <b>Регистрация</b>\n"
+                    "📊 <b>Таблицы БД</b>\n"
+                    "❓ <b>Справка</b>"
                 )
                 
-                return 'success', text, markup
+                return 'success', text, None
             else:
                 return 'error', "❌ Ошибка при сохранении данных. Попробуйте позже.", None
                 
@@ -686,7 +643,7 @@ class RegistrationManager:
             logger.error(f"Критическая ошибка сохранения данных регистрации: {e}")
             return False
     
-    def process_step(self, message, user_state) -> tuple[str, str, types.ReplyKeyboardMarkup]:
+    def process_step(self, message, user_state) -> tuple[str, str, Any]:
         """Обработка текущего шага регистрации"""
         current_step = user_state.current_step
         

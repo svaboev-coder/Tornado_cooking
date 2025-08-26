@@ -1,0 +1,288 @@
+{% extends "client_base.html" %}
+
+{% block title %}Регистрация - Регистрация на питание{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold text-primary">
+                <i class="fas fa-user-plus me-3"></i>
+                Регистрация на питание
+            </h2>
+            <p class="text-muted">Заполните данные для регистрации</p>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-clipboard-list me-2"></i>
+                    Данные регистрации
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" id="registrationForm">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="row">
+                        <!-- Выбор корпуса -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.building.id }}" class="form-label">
+                                <i class="fas fa-building me-2"></i>
+                                {{ form.building.label }}
+                            </label>
+                            {{ form.building(class="form-control", id="building") }}
+                            {% if form.building.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.building.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Выбор номера -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.room.id }}" class="form-label">
+                                <i class="fas fa-bed me-2"></i>
+                                {{ form.room.label }}
+                            </label>
+                            {{ form.room(class="form-control", id="room") }}
+                            {% if form.room.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.room.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <!-- Дата заезда -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.check_in_date.id }}" class="form-label">
+                                <i class="fas fa-calendar-plus me-2"></i>
+                                {{ form.check_in_date.label }}
+                            </label>
+                                                         {{ form.check_in_date(class="form-control", type="date", min=datetime.now().strftime('%Y-%m-%d')) }}
+                            {% if form.check_in_date.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.check_in_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Дата отъезда -->
+                        <div class="col-md-6 mb-3">
+                            <label for="{{ form.check_out_date.id }}" class="form-label">
+                                <i class="fas fa-calendar-minus me-2"></i>
+                                {{ form.check_out_date.label }}
+                            </label>
+                                                         {{ form.check_out_date(class="form-control", type="date", min=datetime.now().strftime('%Y-%m-%d')) }}
+                            {% if form.check_out_date.errors %}
+                                <div class="text-danger small">
+                                    {% for error in form.check_out_date.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <!-- Кнопка проверки доступности -->
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <button type="button" class="btn btn-info" id="checkAvailability" disabled>
+                                <i class="fas fa-search me-2"></i>
+                                Проверить доступность номера
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Результат проверки -->
+                    <div id="availabilityResult" class="alert" style="display: none;"></div>
+                    
+                    <!-- ФИО представителя (изначально скрыто) -->
+                    <div id="representativeSection" style="display: none;">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label for="{{ form.representative_name.id }}" class="form-label">
+                                    <i class="fas fa-user me-2"></i>
+                                    {{ form.representative_name.label }}
+                                </label>
+                                {{ form.representative_name(class="form-control", placeholder="Введите ФИО представителя") }}
+                                {% if form.representative_name.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in form.representative_name.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Кнопка продолжения -->
+                        <div class="row">
+                            <div class="col-12">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-arrow-right me-2"></i>
+                                    Продолжить регистрацию
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <!-- Инструкция -->
+        <div class="card mt-4">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    Инструкция по регистрации
+                </h6>
+            </div>
+            <div class="card-body">
+                <ol class="mb-0">
+                    <li>Выберите корпус и номер</li>
+                    <li>Укажите даты заезда и отъезда</li>
+                    <li>Нажмите "Проверить доступность номера"</li>
+                    <li>Если номер свободен, введите ФИО представителя</li>
+                    <li>Нажмите "Продолжить регистрацию" для заполнения питания</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Загрузка номеров при выборе корпуса
+    $('#building').change(function() {
+        var building = $(this).val();
+        var roomSelect = $('#room');
+        
+        console.log('Выбран корпус:', building);
+        
+        if (building) {
+            console.log('Запрашиваем номера для корпуса:', building);
+            $.get('/api/get_rooms/' + building, function(rooms) {
+                console.log('Получены номера:', rooms);
+                roomSelect.empty();
+                roomSelect.append('<option value="">Выберите номер</option>');
+                rooms.forEach(function(room) {
+                    roomSelect.append('<option value="' + room + '">' + room + '</option>');
+                });
+                console.log('Номера добавлены в список');
+            }).fail(function(xhr, status, error) {
+                console.error('Ошибка при получении номеров:', error);
+                console.error('Статус:', status);
+                console.error('Ответ:', xhr.responseText);
+            });
+        } else {
+            console.log('Корпус не выбран, очищаем список номеров');
+            roomSelect.empty();
+            roomSelect.append('<option value="">Сначала выберите корпус</option>');
+        }
+        
+        // Сброс состояния
+        $('#checkAvailability').prop('disabled', true);
+        $('#representativeSection').hide();
+        $('#availabilityResult').hide();
+    });
+    
+    // Проверка заполнения полей для активации кнопки проверки
+    function checkFields() {
+        var building = $('#building').val();
+        var room = $('#room').val();
+        var checkIn = $('#check_in_date').val();
+        var checkOut = $('#check_out_date').val();
+        
+        // Проверяем даты
+        var today = new Date().toISOString().split('T')[0];
+        var checkInDate = new Date(checkIn);
+        var checkOutDate = new Date(checkOut);
+        var todayDate = new Date(today);
+        
+        // Очищаем предыдущие ошибки
+        $('.date-error').remove();
+        
+        var hasErrors = false;
+        
+        // Проверка даты заезда
+        if (checkIn && checkInDate < todayDate) {
+            $('#check_in_date').after('<div class="text-danger small date-error">Дата заезда не может быть в прошлом</div>');
+            hasErrors = true;
+        }
+        
+        // Проверка даты отъезда
+        if (checkOut) {
+            if (checkOutDate < todayDate) {
+                $('#check_out_date').after('<div class="text-danger small date-error">Дата отъезда не может быть в прошлом</div>');
+                hasErrors = true;
+            } else if (checkIn && checkOutDate <= checkInDate) {
+                $('#check_out_date').after('<div class="text-danger small date-error">Дата отъезда должна быть позже даты заезда</div>');
+                hasErrors = true;
+            }
+        }
+        
+        if (building && room && checkIn && checkOut && !hasErrors) {
+            $('#checkAvailability').prop('disabled', false);
+        } else {
+            $('#checkAvailability').prop('disabled', true);
+        }
+    }
+    
+    $('#room, #check_in_date, #check_out_date').change(checkFields);
+    
+    // Проверка доступности номера
+    $('#checkAvailability').click(function() {
+        var room = $('#room').val();
+        var checkIn = $('#check_in_date').val();
+        var checkOut = $('#check_out_date').val();
+        
+        if (!room || !checkIn || !checkOut) {
+            return;
+        }
+        
+        $(this).prop('disabled', true).html('<i class="fas fa-spinner fa-spin me-2"></i>Проверка...');
+        
+        $.get('/api/check_room', {
+            room: room,
+            check_in: checkIn,
+            check_out: checkOut
+        }, function(data) {
+            $('#checkAvailability').prop('disabled', false).html('<i class="fas fa-search me-2"></i>Проверить доступность номера');
+            
+            var resultDiv = $('#availabilityResult');
+            resultDiv.show();
+            
+            if (data.available) {
+                resultDiv.removeClass('alert-danger').addClass('alert-success');
+                resultDiv.html('<i class="fas fa-check-circle me-2"></i>Номер свободен! Можете продолжить регистрацию.');
+                $('#representativeSection').show();
+            } else {
+                resultDiv.removeClass('alert-success').addClass('alert-danger');
+                resultDiv.html('<i class="fas fa-exclamation-triangle me-2"></i>Номер занят: ' + data.conflicts);
+                $('#representativeSection').hide();
+            }
+        }).fail(function() {
+            $('#checkAvailability').prop('disabled', false).html('<i class="fas fa-search me-2"></i>Проверить доступность номера');
+            $('#availabilityResult').removeClass('alert-success').addClass('alert-danger').show()
+                .html('<i class="fas fa-exclamation-triangle me-2"></i>Ошибка при проверке доступности номера');
+        });
+    });
+});
+</script>
+{% endblock %}
+

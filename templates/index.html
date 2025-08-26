@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+<!-- Версия: {{ version or '1.0' }} -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+
+{% block title %}Главная - Система регистрации на питание{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary mb-3">
+                <i class="fas fa-utensils me-3"></i>
+                Система регистрации на питание
+            </h1>
+            <p class="lead text-muted">
+                Добро пожаловать в систему управления питанием курортного отеля
+            </p>
+        </div>
+    </div>
+</div>
+
+
+
+<!-- Основные функции -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-user-plus fa-3x text-primary"></i>
+                </div>
+                <h5 class="card-title">Регистрация клиентов</h5>
+                <p class="card-text">
+                    Зарегистрируйте новых клиентов на питание в столовой. 
+                    Выберите номер, даты и заполните информацию о питании.
+                </p>
+                                 <a href="{{ url_for('register') }}?v={{ version or '1.0' }}" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>
+                    Начать регистрацию
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card h-100">
+            <div class="card-body text-center">
+                <div class="mb-3">
+                    <i class="fas fa-cog fa-3x text-secondary"></i>
+                </div>
+                <h5 class="card-title">Административная панель</h5>
+                <p class="card-text">
+                    Управление системой, просмотр статистики, 
+                    редактирование справочников и формирование отчетов.
+                </p>
+                                 <a href="{{ url_for('admin') }}?v={{ version or '1.0' }}" class="btn btn-secondary">
+                    <i class="fas fa-tools me-2"></i>
+                    Открыть админ панель
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Информация о системе -->
+<div class="row mt-5">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    О системе
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-check-circle text-success me-2"></i>Возможности системы:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Регистрация клиентов на питание</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Проверка доступности номеров</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Заполнение питания по дням</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Печать пропусков в столовую</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Управление справочниками</li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-cog text-info me-2"></i>Технические особенности:</h6>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Современный веб-интерфейс</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Адаптивный дизайн</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Безопасное хранение данных</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Автоматическое резервное копирование</li>
+                            <li><i class="fas fa-arrow-right text-primary me-2"></i>Детальная статистика</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<script>
+// Принудительное обновление страницы при загрузке
+window.onload = function() {
+    // Проверяем, есть ли параметр версии в URL
+    var urlParams = new URLSearchParams(window.location.search);
+    if (!urlParams.has('v')) {
+        // Если нет параметра версии, добавляем его и перезагружаем
+        var newUrl = window.location.href + (window.location.href.includes('?') ? '&' : '?') + 'v={{ version or "1.0" }}';
+        window.location.href = newUrl;
+    }
+};
+</script>
+
